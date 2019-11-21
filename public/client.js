@@ -1,5 +1,6 @@
 const socket = io();//.connect("http://localhost:3086");
 
+
 let buffer = 2048;
 let context;
 let processor;
