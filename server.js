@@ -4,6 +4,7 @@ var http = require("http").createServer(app);
 var io = require("socket.io")(http);
 
 app.use(express.static("public"));
+app.set("port", (process.env.PORT || 3000));
 
 app.get("/", function (req, res) {
   res.send("Hello world");
@@ -22,7 +23,7 @@ io.on("connection", function (socket) {
   });
 });
 
-http.listen(3000, function () {
+http.listen(app.get("port"), function () {
   console.log("listening on *:3000");
 })
 
