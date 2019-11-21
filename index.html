@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <title>口腔機能測定</title>
+
+  <style>
+    * {
+      line-height: 1;
+    }
+
+    button {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 1em;
+      font-size: 2em;
+      cursor: pointer;
+      background-color: aqua;
+    }
+
+    .status {
+      border: 1px solid #ccc;
+      margin: 1em 0;
+      padding: 1em;
+      text-align: center;
+    }
+
+    .status p {
+      font-size: 2em;
+      /* display: inline; */
+    }
+  </style>
+
+</head>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+  <script src="client.js"></script>
+  <div>
+    <h1>口腔機能測定システム@健口プロジェクト</h1>
+    <h2>オーラルディアドコキネシス測定</h2>
+    <ol>
+      <li>「開始ボタン」を押してください。</li>
+      <li>「パ」をたくさん発してください。</li>
+      <li>５秒間経過したら測定終了です。</li>
+      <li>測定終了後に測定結果が表示されます。</li>
+      <li>測定結果は１秒間あたりの発音回数が表示されます。</li>
+    </ol>
+  </div>
+  <div id="app">
+    <div>
+      <button v-on:click="start" v-if="started==0">測定開始</button>
+    </div>
+    <div v-if="started==1" class="status">
+      <p>測定中</p>
+      <p>（残り：{{timeStr}}秒）</p>
+    </div>
+    <div v-if="started==2" class="status">
+      <p>測定結果</p>
+      <p v-if="!done">計算中...</p>
+      <p v-if="done">{{resultStr}} ( 回 / s )</p>
+      <button v-if="done" v-on:click="started = 0">もう一度測定する</button>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script>
+
+    var app = new Vue({
+      el: "#app",
+      data: {
+        started: 0,
+        time: 0,
+        result: 0,
+        done : false
+      },
+      computed: {
+        timeStr: function () {
+          return this.time.toFixed(1);
+        },
+        resultStr: function () {
+          // return (this.result).toFixed(1);
+          return this.result;
+        }
+      },
+      mounted: function () {
+
+      },
+      methods: {
+        start: function () {
+          record();
+          this.started = 1;
+          this.done = false;
+          this.time = 5;
+          var id = setInterval(async () => {
+            this.result++;
+            if (this.time > 0.0) {
+              this.time = Math.round((this.time - 0.1) * 10) / 10;
+            } else {
+              this.started = 2;
+              clearInterval(id);
+              this.result = await stop();
+              this.done = true;
+            }
+          }, (100));
+        }
+      }
+    })
+  </script>
+</body>
+
+</html>
